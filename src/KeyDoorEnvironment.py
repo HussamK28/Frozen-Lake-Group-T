@@ -6,7 +6,7 @@ from minigrid.minigrid_env import MiniGridEnv
 from minigrid.core.mission import MissionSpace
 
 class KeyDoorEnvironment(MiniGridEnv):
-    def __init__(self, size=20, max_steps=1600, **kwargs):
+    def __init__(self, size=10, max_steps=400, **kwargs):
         mission_space = MissionSpace(
             mission_func=lambda: "You have 4 coloured doors, unlock the doors with their corresponding keys in the correct order to reach the goal"
         )
