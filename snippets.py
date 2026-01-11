@@ -182,6 +182,13 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
 
     return policy, value
 
+def e_greedy(q, state, random_state, epsilon):
+    if random_state.rand() < epsilon:
+        return random_state.randint(q.shape[1])
+    else:
+        return np.argmax(q[state])
+
+
 def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
     
@@ -192,7 +199,15 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     
     for i in range(max_episodes):
         s = env.reset()
-        # TODO:
+        a = e_greedy(q, s, random_state, epsilon[i])
+        end = False
+        while not end:
+            nextS, r, end = env.step(a)
+            nextA = e_greedy(q, nextS, random_state, epsilon[i])
+            q[s, a] += eta[i] * (r + gamma * q[nextS, nextA] - q[s, a])
+            
+            s, a = nextS, nextA
+    
     
     policy = q.argmax(axis=1)
     value = q.max(axis=1)

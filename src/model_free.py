@@ -145,7 +145,7 @@ def print_results(lake, policy, value):
     # Action mapping (adjust based on your environment's action order)
     # Based on your FrozenLake: directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]
     # That's: 0=up, 1=left, 2=down, 3=right
-    action_symbols = {0: '↑', 1: '←', 2: '↓', 3: '→'}
+    action_symbols = {0: '←', 1: '↓', 2: '→', 3: '↑'}
     
     print("SARSA Results:")
     print("Lake:")
@@ -189,9 +189,9 @@ def main():
     # Set parameters for better learning
     slip = 0.1  # Slippery surface
     max_steps = 100  # More steps per episode
-    learning_rate = 0.5  # Higher learning rate
-    discount_factor = 0.9  # Discount factor
-    epsilon = 0.3  # More exploration initially
+    learning_rate = 0.1  # Higher learning rate
+    discount_factor = 0.99  # Discount factor
+    epsilon = 0.1  # More exploration initially
     episodes = 20000  # More episodes
     
     print("Starting SARSA training...")
