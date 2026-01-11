@@ -1,3 +1,5 @@
+import random
+import time
 from minigrid.core.grid import Grid
 from minigrid.core.world_object import Door, Key, Goal, Wall
 from minigrid.minigrid_env import MiniGridEnv
@@ -5,25 +7,88 @@ from minigrid.core.mission import MissionSpace
 from minigrid.core.constants import COLOR_NAMES
 
 class KeyDoorEnvironment(MiniGridEnv):
-    def __init__(self, size=8, max_steps=300, **kwargs):
+    def __init__(self, size=10, max_steps=400, **kwargs):
         mission_space = MissionSpace(
-            mission_func=lambda: "Unlock the doors in the correct order and reach the goal"
+            mission_func=lambda: "You have 4 coloured doors, unlock the doors with their corresponding keys in the correct order (red, blue, green, yellow) to reach the goal"
         )
 
         super().__init__(
             mission_space=mission_space,
-            grid_size=size,
+            width=size,
+            height=size,
             max_steps=max_steps,
             see_through_walls=False,
-            agent_view_size=7,
+            agent_view_size=5,
             **kwargs
         )
+        
 
 
     def _gen_grid(self, width, height):
         self.grid = Grid(width, height)
         self.grid.wall_rect(0, 0, width, height)
+        colours = ["red", "blue", "green", "yellow"]
+
+        for i, colour in enumerate(colours):
+            key = Key(colour)
+            freeKeyCell = self.placeInRandomCell()
+            self.grid.set(*freeKeyCell, key)
+
+            door = Door(colour, is_open=False, is_locked=True)
+            freeDoorCell = self.placeInRandomCell()
+            
+            self.grid.set(*freeDoorCell, door)
+             
+
+        goal = Goal()
+        goalCell = self.placeInRandomCell()
+        self.grid.set(*goalCell, goal)
+
         self.place_agent()
-        keyA = Key("red")
-        KeyB = Key("blue")
-        KeyC = Key("green")
+        self.mission = "You have 4 coloured doors, unlock the doors with their corresponding keys in the correct order (red, blue, green, yellow) to reach the goal"
+        
+    def placeInRandomCell(self):
+        while True:
+            x = random.randint(1, self.width - 2)
+            y = random.randint(1, self.height - 2)
+            if self.grid.get(x, y) is None:
+                return (x, y)
+
+
+env = KeyDoorEnvironment(render_mode="human")
+num_tests = 10
+
+for episode in range(num_tests):
+    print(f"\n=== Episode {episode+1} ===")
+    obs, info = env.reset()
+
+    # Collect all object positions
+    obj_positions = {}
+    for x in range(env.width):
+        for y in range(env.height):
+            obj = env.grid.get(x, y)
+            if obj is not None:
+                obj_positions[(x, y)] = obj
+
+    # Print agent position
+    print("Agent position:", env.agent_pos)
+
+    # Print all keys
+    keys = [(pos, obj.color) for pos, obj in obj_positions.items() if isinstance(obj, Key)]
+    print("Keys:", keys)
+
+    # Print all doors
+    doors = [(pos, obj.color) for pos, obj in obj_positions.items() if isinstance(obj, Door)]
+    print("Doors:", doors)
+
+    # Print goal position
+    goal = [(pos, "Goal") for pos, obj in obj_positions.items() if isinstance(obj, Goal)]
+
+    print("Goal:", goal)
+
+    # Render the environment for 2 seconds
+    env.render()
+    time.sleep(2)
+
+print("\n✅ Testing completed. Check positions and randomization visually.")
+env.close()
