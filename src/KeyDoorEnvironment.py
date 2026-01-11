@@ -5,17 +5,25 @@ from minigrid.core.mission import MissionSpace
 from minigrid.core.constants import COLOR_NAMES
 
 class KeyDoorEnvironment(MiniGridEnv):
-    def __init__(
-        self, 
-        mission_space: MissionSpace, 
-        grid_size: int | 
-        None = None, width: int | None = None, height: int | None = None,
-        max_steps: int = 100, 
-        see_through_walls: bool = False, 
-        agent_view_size: int = 7, 
-        render_mode: str | None = None, 
-        screen_size: int | None = 640, 
-        highlight: bool = True, 
-        tile_size: int = ..., 
-        agent_pov: bool = False):
-        super().__init__(mission_space, grid_size, width, height, max_steps, see_through_walls, agent_view_size, render_mode, screen_size, highlight, tile_size, agent_pov)
+    def __init__(self, size=8, max_steps=300, **kwargs):
+        mission_space = MissionSpace(
+            mission_func=lambda: "Unlock the doors in the correct order and reach the goal"
+        )
+
+        super().__init__(
+            mission_space=mission_space,
+            grid_size=size,
+            max_steps=max_steps,
+            see_through_walls=False,
+            agent_view_size=7,
+            **kwargs
+        )
+
+
+    def _gen_grid(self, width, height):
+        self.grid = Grid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        self.place_agent()
+        keyA = Key("red")
+        KeyB = Key("blue")
+        KeyC = Key("green")
