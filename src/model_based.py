@@ -1,5 +1,7 @@
 import numpy as np
 from environment import FrozenLake
+import matplotlib.pyplot as plt
+
 
 class LinearWrapper:
     def __init__(self, env):
@@ -194,7 +196,7 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed):
 
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
-    return policy, value
+    return policy, value, np.array(returns)
 
 
 def q_learning(env, max_episodes, eta, gamma, epsilon, seed):
@@ -227,7 +229,7 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed):
     value = q.max(axis=1)
 
 
-    return policy, value
+    return policy, value, np.array(returns)
 
 def e_greedy_linear(theta, features, n_actions, random_state, epsilon):
     if random_state.rand() < epsilon:
@@ -271,7 +273,7 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
         returns.append(episode_return)
 
     
-    return theta
+    return theta, np.array(returns)
 
 
 
@@ -317,6 +319,9 @@ def print_results(lake, policy, value):
         formatted_row = [f"{v:.3f}" for v in row_values]
         print(formatted_row)
 
+def moving_average(x, window=20):
+    return np.convolve(x, np.ones(window)/window, mode='valid')
+
 def main():
     # Define the lake grid from the assignment
     lake = [
@@ -328,7 +333,7 @@ def main():
     env = FrozenLake(lake, slip=0.1, max_steps=100, seed=42)
     print("LINEAR SARSA CONTROL......")
     linear_env = LinearWrapper(env)
-    parameters = linear_sarsa(
+    parameters, linear_returns = linear_sarsa(
         env=linear_env,
         max_episodes=50000,
         eta=0.07,
@@ -343,11 +348,11 @@ def main():
     linear_env.render(policy, value)
     print("SARSA CONTROL......")
 
-    policy, value = sarsa (
+    policy, value, sarsa_returns = sarsa (
         env=env,
         max_episodes=50000,
         eta=0.07,
-        gamma=0.92,
+        gamma=0.90,
         epsilon=1.0,
         seed=42
 
@@ -357,17 +362,24 @@ def main():
 
     print("Q-LEARNING CONTROL......")
 
-    policy, value = q_learning(
+    policy, value, q_returns = q_learning(
         env=env,
         max_episodes=50000,
         eta=0.07,
-        gamma=0.92,
+        gamma=0.90,
         epsilon=1.0,
         seed=42
 
     )
     print_results(lake, policy, value)
     env.render(policy=policy, value=value)
+
+    plt.plot(moving_average(sarsa_returns))
+    plt.xlabel("Episode")
+    plt.ylabel("Moving average return (20)")
+    plt.title("SARSA on FrozenLake")
+    plt.show()
+
 
 if __name__ == "__main__":
     main()
