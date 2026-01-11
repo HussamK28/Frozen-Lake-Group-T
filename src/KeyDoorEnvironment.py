@@ -4,12 +4,11 @@ from minigrid.core.grid import Grid
 from minigrid.core.world_object import Door, Key, Goal, Wall
 from minigrid.minigrid_env import MiniGridEnv
 from minigrid.core.mission import MissionSpace
-from minigrid.core.constants import COLOR_NAMES
 
 class KeyDoorEnvironment(MiniGridEnv):
     def __init__(self, size=10, max_steps=400, **kwargs):
         mission_space = MissionSpace(
-            mission_func=lambda: "You have 4 coloured doors, unlock the doors with their corresponding keys in the correct order (red, blue, green, yellow) to reach the goal"
+            mission_func=lambda: "You have 4 coloured doors, unlock the doors with their corresponding keys in the correct order to reach the goal"
         )
 
         super().__init__(
@@ -18,7 +17,7 @@ class KeyDoorEnvironment(MiniGridEnv):
             height=size,
             max_steps=max_steps,
             see_through_walls=False,
-            agent_view_size=5,
+            agent_view_size=3,
             **kwargs
         )
         
@@ -27,7 +26,21 @@ class KeyDoorEnvironment(MiniGridEnv):
     def _gen_grid(self, width, height):
         self.grid = Grid(width, height)
         self.grid.wall_rect(0, 0, width, height)
+
+        numWalls = 5
+        for _ in range(numWalls):
+            while True:
+                x = random.randint(1, width-2)
+                y = random.randint(1, height-2)
+                if self.grid.get(x,y) is None:
+                    self.grid.set(x,y,Wall())
+                    break
+
+        
         colours = ["red", "blue", "green", "yellow"]
+        random.shuffle(colours)
+        self.mission = f"Unlock doors in this order: {', '.join(colours)} to reach the goal"
+        self.place_agent()
 
         for i, colour in enumerate(colours):
             key = Key(colour)
@@ -43,9 +56,6 @@ class KeyDoorEnvironment(MiniGridEnv):
         goal = Goal()
         goalCell = self.placeInRandomCell()
         self.grid.set(*goalCell, goal)
-
-        self.place_agent()
-        self.mission = "You have 4 coloured doors, unlock the doors with their corresponding keys in the correct order (red, blue, green, yellow) to reach the goal"
         
     def placeInRandomCell(self):
         while True:
