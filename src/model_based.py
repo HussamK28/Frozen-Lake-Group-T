@@ -164,20 +164,23 @@ def e_greedy(q, state, random_state, epsilon):
 
 def sarsa(env, max_episodes, eta, gamma, epsilon, seed):
     random_state = np.random.RandomState(seed)
-
     eta = np.linspace(eta, 0.05, max_episodes)
-    epsilon = np.linspace(epsilon, 0.1, max_episodes)
+    epsilon = np.linspace(epsilon, 0.05, max_episodes)
 
-    q = np.zeros((env.n_states, env.n_actions))
+    q = np.zeros((env.n_states, env.n_actions))*0.1
+    returns = []
 
     for i in range(max_episodes):
         s = env.reset()
-
         a = e_greedy(q, s, random_state, epsilon[i])
         end = False
+        episode_return = 0.0
+        discount = 1.0
 
         while not end:
             nextS, r, end = env.step(a)
+            episode_return+=discount*r
+            discount*=gamma
 
             if end:
                 q[s, a] += eta[i] * (r - q[s, a])
@@ -187,6 +190,7 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed):
             q[s, a] += eta[i] * (r + gamma * q[nextS, nextA] - q[s, a])
 
             s, a = nextS, nextA
+        returns.append(episode_return)
 
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
@@ -200,22 +204,28 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed):
     epsilon = np.linspace(epsilon, 0.05, max_episodes)
 
     q = np.zeros((env.n_states, env.n_actions))
+    returns = []
 
     for i in range(max_episodes):
         s = env.reset()
         done = False
-        stepCount = 0
+        episode_return = 0.0
+        discount = 1.0
         while not done:
-            a = random_state.randint(env.n_actions)
+            a = e_greedy(q, s, random_state, epsilon[i])
             nextS, r, done = env.step(a)
+            episode_return+=discount*r
+            discount*=gamma
+
             q[s, a] += eta[i] * (r + gamma * np.max(q[nextS]) - q[s, a])
             s = nextS
-            stepCount += 1
+        returns.append(episode_return)
 
 
     # Derive policy and value from Q-table
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
+
 
     return policy, value
 
@@ -234,13 +244,20 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     epsilon = np.linspace(epsilon, 0.1, max_episodes)
     
     theta = np.zeros(env.n_features)
+    returns = []
     
     for i in range(max_episodes):
         features = env.reset()
         a = e_greedy_linear(theta, features, env.n_actions, random_state, epsilon[i])
         done = False
+
+        episode_return = 0.0
+        discount = 1.0
+
         while not done:
             nextFeatures, r, done = env.step(a)
+            episode_return += discount * r
+            discount *= gamma
             q = features[a].dot(theta)
             if done:
                 theta += eta[i] * (r - q) * features[a]
@@ -251,6 +268,7 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             theta += eta[i] * targetError * features[a]
             features = nextFeatures
             a = nextA
+        returns.append(episode_return)
 
     
     return theta
@@ -308,6 +326,7 @@ def main():
         ['#', ' ', ' ', '$']
     ]
     env = FrozenLake(lake, slip=0.1, max_steps=100, seed=42)
+    print("LINEAR SARSA CONTROL......")
     linear_env = LinearWrapper(env)
     parameters = linear_sarsa(
         env=linear_env,
@@ -322,10 +341,33 @@ def main():
     print("Value:", value)
 
     linear_env.render(policy, value)
-    
-    print("Policy:", policy)
-    print("Value:", value)
+    print("SARSA CONTROL......")
 
+    policy, value = sarsa (
+        env=env,
+        max_episodes=50000,
+        eta=0.07,
+        gamma=0.92,
+        epsilon=1.0,
+        seed=42
+
+    )
+    print_results(lake, policy, value)
+    env.render(policy=policy, value=value)
+
+    print("Q-LEARNING CONTROL......")
+
+    policy, value = q_learning(
+        env=env,
+        max_episodes=50000,
+        eta=0.07,
+        gamma=0.92,
+        epsilon=1.0,
+        seed=42
+
+    )
+    print_results(lake, policy, value)
+    env.render(policy=policy, value=value)
 
 if __name__ == "__main__":
     main()
