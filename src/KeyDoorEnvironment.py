@@ -1,7 +1,7 @@
 import random
 import time
 from minigrid.core.grid import Grid
-from minigrid.core.world_object import Door, Key, Goal, Wall
+from minigrid.core.world_object import Door, Key, Goal, Wall, Ball
 from minigrid.minigrid_env import MiniGridEnv
 from minigrid.core.mission import MissionSpace
 
@@ -40,7 +40,6 @@ class KeyDoorEnvironment(MiniGridEnv):
         colours = ["red", "blue", "green", "yellow"]
         random.shuffle(colours)
         self.mission = f"Unlock doors in this order: {', '.join(colours)} to reach the goal"
-        self.place_agent()
 
         for i, colour in enumerate(colours):
             key = Key(colour)
@@ -51,11 +50,18 @@ class KeyDoorEnvironment(MiniGridEnv):
             freeDoorCell = self.placeInRandomCell()
             
             self.grid.set(*freeDoorCell, door)
+
+        num_coins = 3
+        for _ in range(num_coins):
+            coin = Ball("yellow")
+            coin_cell = self.placeInRandomCell()
+            self.grid.set(*coin_cell, coin)
              
 
         goal = Goal()
         goalCell = self.placeInRandomCell()
         self.grid.set(*goalCell, goal)
+        self.place_agent()
         
     def placeInRandomCell(self):
         while True:
@@ -72,7 +78,6 @@ for episode in range(num_tests):
     print(f"\n=== Episode {episode+1} ===")
     obs, info = env.reset()
 
-    # Collect all object positions
     obj_positions = {}
     for x in range(env.width):
         for y in range(env.height):
