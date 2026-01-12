@@ -425,6 +425,17 @@ def main():
     plt.title("SARSA on FrozenLake")
     plt.show()
 
+    plt.plot(moving_average(q_returns))
+    plt.xlabel("Episode")
+    plt.ylabel("Moving average return (20)")
+    plt.title("Q-Learning on FrozenLake")
+    plt.show()
+
+    plt.plot(moving_average(linear_returns))
+    plt.xlabel("Episode")
+    plt.ylabel("Moving average return (20)")
+    plt.title("Linear SARSA on FrozenLake")
+    plt.show()
 
 if __name__ == "__main__":
     main()

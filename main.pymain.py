@@ -1,3 +1,4 @@
+
 from src.environment import FrozenLake
 from src.model_based import policy_iteration, value_iteration, sarsa, q_learning, LinearWrapper, linear_q_learning
 from src.dqn import FrozenLakeImageWrapper, deep_q_network_learning
@@ -10,7 +11,7 @@ def main():
         ['#', '.', '.', '$']
     ]
     
-    env = FrozenLake(lake, slip=0.1, max_steps=16, seed=0)
+    env = FrozenLake(lake, slip=0.1, max_steps=100, seed=42)
     
     print('Model-based algorithms')
     print('')
@@ -25,19 +26,12 @@ def main():
 
     print('')
     print('SARSA')
-    policy, value, _ = sarsa(env, max_episodes=2000, eta=0.1, gamma=0.99, epsilon=0.1, seed=0)
+    policy, value, sarsa_returns = sarsa(env, max_episodes=50000, eta=0.07, gamma=0.90, epsilon=1.0, seed=42)
     env.render(policy, value)
 
     print('')
     print('Q-Learning')
-    policy, value, _ = q_learning(env, max_episodes=2000, eta=0.1, gamma=0.99, epsilon=0.1, seed=0)
-    env.render(policy, value)
-
-    print('')
-    print('Linear Q-Learning (Point 7)')
-    linear_env = LinearWrapper(env)
-    theta = linear_q_learning(linear_env, max_episodes=4000, eta=0.5, gamma=0.99, epsilon=0.5, seed=0)
-    policy, value= linear_env.decode_policy(theta)
+    policy, value, q_returns = q_learning(env, max_episodes=50000, eta=0.07, gamma=0.90, epsilon=1.0, seed=42)
     env.render(policy, value)
 
     print('')
