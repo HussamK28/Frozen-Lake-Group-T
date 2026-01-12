@@ -1,5 +1,5 @@
 import numpy as np
-from environment import FrozenLake
+from .environment import FrozenLake
 import matplotlib.pyplot as plt
 
 
@@ -276,6 +276,51 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     return theta, np.array(returns)
 
 
+def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
+    random_state = np.random.RandomState(seed)
+
+    # Decay to 0
+    eta = np.linspace(eta, 0.0, max_episodes)
+    epsilon = np.linspace(epsilon, 0.0, max_episodes)
+
+    theta = np.zeros(env.n_features)
+
+    for i in range(max_episodes):
+        features = env.reset()
+        done = False
+
+        while not done:
+            # Q-values for all actions at current state
+            q_values = features.dot(theta)  # shape (n_actions,)
+
+            # epsilon-greedy + random tie-breaking
+            if random_state.rand() < epsilon[i]:
+                action = random_state.randint(env.n_actions)
+            else:
+                qmax = np.max(q_values)
+                best_actions = np.where(np.isclose(q_values, qmax))[0]
+                action = random_state.choice(best_actions)
+
+            next_features, r, done = env.step(action)
+
+            # current estimate
+            q_sa = q_values[action]
+
+            # Q-learning target uses max over next actions (off-policy)
+            if done:
+                target = r
+            else:
+                next_q_values = next_features.dot(theta)
+                target = r + gamma * np.max(next_q_values)
+
+            td_error = target - q_sa
+
+            # SGD update: theta <- theta + alpha * delta * phi(s,a)
+            theta += eta[i] * td_error * features[action]
+
+            features = next_features
+
+    return theta
 
 
 def print_results(lake, policy, value):
