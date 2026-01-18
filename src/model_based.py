@@ -1,5 +1,6 @@
 import numpy as np
-from .environment import FrozenLake
+from environment import FrozenLake
+from dqn import FrozenLakeImageWrapper, deep_q_network_learning
 import matplotlib.pyplot as plt
 
 
@@ -284,14 +285,18 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     epsilon = np.linspace(epsilon, 0.0, max_episodes)
 
     theta = np.zeros(env.n_features)
+    returns = []
 
     for i in range(max_episodes):
         features = env.reset()
         done = False
 
+        episode_return = 0.0
+        discount = 1.0
         while not done:
             # Q-values for all actions at current state
             q_values = features.dot(theta)  # shape (n_actions,)
+
 
             # epsilon-greedy + random tie-breaking
             if random_state.rand() < epsilon[i]:
@@ -302,6 +307,8 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
                 action = random_state.choice(best_actions)
 
             next_features, r, done = env.step(action)
+            episode_return+= discount*r
+            discount*=gamma
 
             # current estimate
             q_sa = q_values[action]
@@ -319,8 +326,9 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             theta += eta[i] * td_error * features[action]
 
             features = next_features
+        returns.append(episode_return)
 
-    return theta
+    return theta, np.array(episode_return)
 
 
 def print_results(lake, policy, value):
@@ -376,6 +384,7 @@ def main():
         ['#', ' ', ' ', '$']
     ]
     env = FrozenLake(lake, slip=0.1, max_steps=100, seed=42)
+    
     print("LINEAR SARSA CONTROL......")
     linear_env = LinearWrapper(env)
     parameters, linear_returns = linear_sarsa(
@@ -387,10 +396,22 @@ def main():
         seed=42
     )
     policy, value = linear_env.decode_policy(parameters)
-    print("Policy:", policy)
-    print("Value:", value)
+
 
     linear_env.render(policy, value)
+
+    print("LINEAR Q-LEARNING......")
+    parameters, linear_qreturns = linear_q_learning(
+        env=linear_env,
+        max_episodes=50000,
+        eta=0.07,
+        gamma=0.96,
+        epsilon=0.1,
+        seed=42
+    )
+    policy, value = linear_env.decode_policy(parameters)
+
+
     print("SARSA CONTROL......")
 
     policy, value, sarsa_returns = sarsa (
@@ -419,6 +440,25 @@ def main():
     print_results(lake, policy, value)
     env.render(policy=policy, value=value)
 
+    print('Deep Q-Network (Point 8)')
+    image_env = FrozenLakeImageWrapper(env)
+    dqn, dqn_returns = deep_q_network_learning(
+        image_env,
+        max_episodes=4000,
+        learning_rate=0.001,
+        gamma=0.99,
+        epsilon=0.2,
+        batch_size=32,
+        target_update_frequency=4,
+        buffer_size=256,
+        kernel_size=3,
+        convoutchannels=4,
+        fcoutfeatures=8,
+        seed=0
+    )
+    policy, value = image_env.decode_policy(dqn)
+    image_env.render(policy, value)
+'''
     plt.plot(moving_average(sarsa_returns))
     plt.xlabel("Episode")
     plt.ylabel("Moving average return (20)")
@@ -436,6 +476,19 @@ def main():
     plt.ylabel("Moving average return (20)")
     plt.title("Linear SARSA on FrozenLake")
     plt.show()
+
+    plt.plot(moving_average(linear_qreturns))
+    plt.xlabel("Episode")
+    plt.ylabel("Moving average return (20)")
+    plt.title("Linear Q-Learning on FrozenLake")
+    plt.show()
+
+    plt.plot(moving_average(dqn_returns))
+    plt.xlabel("Episode")
+    plt.ylabel("Moving average return (20)")
+    plt.title("Deep Q-Network on FrozenLake")
+    plt.show()
+'''
 
 if __name__ == "__main__":
     main()

@@ -174,11 +174,14 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
     tdqn.load_state_dict(dqn.state_dict())
 
     buffer = ReplayBuffer(buffer_size=buffer_size, seed=seed)
+    returns = []
 
     for i in range(max_episodes):
         state = env.reset()
         done = False
 
+        episode_returns = 0.0
+        discount = 1.0
         while not done:
             # epsilon-greedy action from dqn
             if random_state.rand() < epsilon[i]:
@@ -191,6 +194,8 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
                 action = int(random_state.choice(best))
 
             next_state, r, done = env.step(action)
+            episode_returns+=discount*r
+            discount*=gamma
 
             buffer.add((state, action, r, next_state, done))
             state = next_state
@@ -203,5 +208,6 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
         # update target net periodically
         if (i + 1) % target_update_frequency == 0:
             tdqn.load_state_dict(dqn.state_dict())
+        returns.append(episode_returns)
 
-    return dqn
+    return dqn, np.array(returns)
