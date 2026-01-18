@@ -8,7 +8,7 @@ from gymnasium.envs.registration import register
 
 
 class KeyDoorEnvironment(MiniGridEnv):
-    def __init__(self, size=10, max_steps=400, **kwargs):
+    def __init__(self, size=10, max_steps=400, reward_shaping=True, **kwargs):
         mission_space = MissionSpace(
             mission_func=lambda: (
                 "Unlock the coloured doors using their matching keys "
@@ -25,6 +25,8 @@ class KeyDoorEnvironment(MiniGridEnv):
             agent_view_size=3,
             **kwargs
         )
+
+        self.reward_shaping = reward_shaping
 
     def _gen_grid(self, width, height):
         # Create empty grid and surround with walls
@@ -83,16 +85,14 @@ class KeyDoorEnvironment(MiniGridEnv):
         fwd_cell = self.grid.get(*fwd_pos)
 
         # Reward correct door opening
-        if isinstance(fwd_cell, Door):
+        # Reward correct door opening (shaping)
+        if self.reward_shaping and isinstance(fwd_cell, Door):
             expected_colour = self.colours[self.current_door_index]
 
-            if (
-                fwd_cell.is_open
-                and fwd_cell.color == expected_colour
-            ):
+            if fwd_cell.is_open and fwd_cell.color == expected_colour:
                 reward += 0.5
                 self.current_door_index += 1
-
+                
         # Reward reaching goal
         if terminated:
             reward += 1.0
