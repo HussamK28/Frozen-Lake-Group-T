@@ -1,2 +1,10 @@
-# sp
-assignment2
+# README
+Please ensure the following is installed on your computer to run this code:
+stable_baselines3 (2.7.1)
+Minigrid (3.0.0)
+gymnasium (1.2.3)
+torch>=2.0
+numpy
+matplotlib
+pandas
+
