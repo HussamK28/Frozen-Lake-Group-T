@@ -21,7 +21,7 @@ def episodes_to_threshold(returns, threshold):
     return None
 
 for seed in [0, 1]:
-    path = f"results/seed_{seed}/monitor.csv"
+    path = f"results/baseline/seed_{seed}/monitor.csv"
     returns = load_returns(path)
     ett = episodes_to_threshold(returns, THRESHOLD)
     print(f"Seed {seed}: episodes-to-threshold (MA{WINDOW} >= {THRESHOLD}) = {ett}")
@@ -34,7 +34,7 @@ def final_performance_stats(returns, window=20, tail=100):
 print("\nFinal performance statistics (last 100 MA episodes):")
 
 for seed in [0, 1]:
-    path = f"results/seed_{seed}/monitor.csv"
+    path = f"results/baseline/seed_{seed}/monitor.csv"
     returns = load_returns(path)
 
     mean, std = final_performance_stats(returns)
@@ -47,7 +47,7 @@ final_means = []
 final_stds = []
 
 for seed in [0, 1]:
-    path = f"results/seed_{seed}/monitor.csv"
+    path = f"results/baseline/seed_{seed}/monitor.csv"
     returns = load_returns(path)
     mean, std = final_performance_stats(returns)
     final_means.append(mean)

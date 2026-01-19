@@ -14,8 +14,8 @@ def moving_average(x, window=20):
 
 import numpy as np
 
-r0 = load_returns("results/seed_0/monitor.csv")
-r1 = load_returns("results/seed_1/monitor.csv")
+r0 = load_returns("results/baseline/seed_0/monitor.csv")
+r1 = load_returns("results/baseline/seed_1/monitor.csv")
 
 m0 = moving_average(r0, window=20)
 m1 = moving_average(r1, window=20)
@@ -44,4 +44,5 @@ plt.ylabel("Return (moving avg, window=20)")
 plt.title("Learning Curve (PPO on MiniGrid-KeyDoor)")
 plt.legend()
 plt.tight_layout()
-plt.show()
+plt.savefig("figure1_baseline_learning.png", dpi=300, bbox_inches="tight")
+plt.close()
