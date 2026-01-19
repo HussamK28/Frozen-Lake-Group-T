@@ -34,7 +34,7 @@ def main():
 
     print('')
     print('Q-Learning')
-    policy, value, q_returns = q_learning(env, max_episodes=50000, eta=0.07, gamma=0.90, epsilon=1.0, seed=42)
+    policy, value, q_returns = q_learning(env, max_episodes=40000, eta=0.07, gamma=0.90, epsilon=1.0, seed=42)
     env.render(policy, value)
 
     print('')
