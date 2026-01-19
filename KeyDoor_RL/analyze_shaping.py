@@ -46,5 +46,5 @@ def summarize(name, path):
     print(f"  sustained threshold (>= {THRESHOLD} for 20 episodes) = {sustained}")
     print()
 
-summarize("Reward shaping ON",  "results/shaping_on/seed_1/monitor.csv")
-summarize("Reward shaping OFF", "results/shaping_off/seed_1/monitor.csv")
+summarize("Reward shaping ON",  "logs/monitor.csv")
+summarize("Reward shaping OFF", "logs/monitor.csv")

@@ -11,8 +11,8 @@ def moving_average(x, window):
     return pd.Series(x).rolling(window).mean().dropna().to_numpy()
 
 # Load reward shaping ON and OFF data
-r_on = load_returns("results/shaping_on/seed_1/monitor.csv")
-r_off = load_returns("results/shaping_off/seed_1/monitor.csv")
+r_on = load_returns("logs/monitor.csv")
+r_off = load_returns("logs/monitor.csv")
 
 ma_on = moving_average(r_on, WINDOW)
 ma_off = moving_average(r_off, WINDOW)
