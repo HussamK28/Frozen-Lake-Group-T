@@ -1,6 +1,6 @@
 import numpy as np
-from environment import FrozenLake
-from dqn import FrozenLakeImageWrapper, deep_q_network_learning
+from src.environment import FrozenLake
+from src.dqn import FrozenLakeImageWrapper, deep_q_network_learning
 import matplotlib.pyplot as plt
 
 
@@ -241,6 +241,7 @@ def e_greedy_linear(theta, features, n_actions, random_state, epsilon):
 
 
 def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
+    features = env.reset()
     random_state = np.random.RandomState(seed)
     
     eta = np.linspace(eta, 0.05, max_episodes)
@@ -328,7 +329,7 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             features = next_features
         returns.append(episode_return)
 
-    return theta, np.array(episode_return)
+    return theta, np.array(returns)
 
 
 def print_results(lake, policy, value):
@@ -458,7 +459,7 @@ def main():
     )
     policy, value = image_env.decode_policy(dqn)
     image_env.render(policy, value)
-'''
+
     plt.plot(moving_average(sarsa_returns))
     plt.xlabel("Episode")
     plt.ylabel("Moving average return (20)")
@@ -488,7 +489,7 @@ def main():
     plt.ylabel("Moving average return (20)")
     plt.title("Deep Q-Network on FrozenLake")
     plt.show()
-'''
+
 
 if __name__ == "__main__":
     main()
