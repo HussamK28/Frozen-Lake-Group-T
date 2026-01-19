@@ -29,12 +29,12 @@ def main():
 
     print('')
     print('SARSA')
-    policy, value, sarsa_returns = sarsa(env, max_episodes=50000, eta=0.07, gamma=0.90, epsilon=1.0, seed=42)
+    policy, value, sarsa_returns = sarsa(env, max_episodes=5000, eta=0.1, gamma=0.90, epsilon=1.0, seed=42)
     env.render(policy, value)
 
     print('')
     print('Q-Learning')
-    policy, value, q_returns = q_learning(env, max_episodes=40000, eta=0.07, gamma=0.90, epsilon=1.0, seed=42)
+    policy, value, q_returns = q_learning(env, max_episodes=4000, eta=0.1, gamma=0.90, epsilon=1.0, seed=42)
     env.render(policy, value)
 
     print('')
@@ -44,9 +44,9 @@ def main():
 
     parameters, linear_returns = linear_sarsa(
         env=linear_env,
-        max_episodes=50000,
-        eta=0.07,
-        gamma=0.96,
+        max_episodes=40000,
+        eta=0.06,
+        gamma=0.94,
         epsilon=0.1,
         seed=42
     )
@@ -62,17 +62,14 @@ def main():
 
     parameters, linear_qreturns = linear_q_learning(
         env=linear_env,
-        max_episodes=50000,
-        eta=0.07,
-        gamma=0.96,
+        max_episodes=40000,
+        eta=0.04,
+        gamma=0.90,
         epsilon=0.1,
         seed=42
     )
     policy, value = linear_env.decode_policy(parameters)
     linear_env.render(policy, value)
-
-
-
 
 
     print('')
@@ -81,9 +78,9 @@ def main():
     dqn, dqn_returns = deep_q_network_learning(
         image_env,
         max_episodes=4000,
-        learning_rate=0.001,
-        gamma=0.99,
-        epsilon=0.2,
+        learning_rate=0.0005,
+        gamma=0.90,
+        epsilon=0.3,
         batch_size=32,
         target_update_frequency=4,
         buffer_size=256,
@@ -94,6 +91,28 @@ def main():
     )
     policy, value = image_env.decode_policy(dqn)
     image_env.render(policy, value)
+
+    bigLake = [
+        ['&', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', '#', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', '#', ' ', ' '],
+        [' ', ' ', ' ', '#', ' ', ' ', ' ', ' '],
+        [' ', '#', '#', ' ', ' ', ' ', '#', ' '],
+        [' ', '#', ' ', ' ', '#', ' ', '#', ' '],
+        [' ', ' ', ' ', '#', ' ', ' ', ' ', '$']
+    ]
+    print('')
+    env = FrozenLake(bigLake, slip=0.1, max_steps=100, seed=42)
+    print('SARSA (big lake)')
+    policy, value, sarsa_returns = sarsa(env, max_episodes=50000, eta=0.06, gamma=0.95, epsilon=1.0, seed=42)
+    env.render(policy, value)
+
+    print('')
+    env = FrozenLake(bigLake, slip=0.1, max_steps=100, seed=42)
+    print('Q-Learning (big lake)')
+    policy, value, sarsa_returns = q_learning(env, max_episodes=40000, eta=0.07, gamma=0.97, epsilon=1.0, seed=42)
+    env.render(policy, value)
 
 if __name__ == "__main__":
     main()
